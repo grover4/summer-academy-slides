@@ -236,7 +236,7 @@ class: top
 .left-column[#`r fontawesome::fa(name="laptop-code", fill="white")`]
 .right-column[
 
-1. .left[ Log in to [https://ranjini-grove.shinyapps.io/ggplot/]( https://ranjini-grove.shinyapps.io/ggplot/)]
+1. .left[ Log in to [https://ranjini-grove.shinyapps.io/hello-ggplot/]( https://ranjini-grove.shinyapps.io/hello-ggplot/)]
 
 1. .left[ Work through the `ggplot` tutorial]
 
