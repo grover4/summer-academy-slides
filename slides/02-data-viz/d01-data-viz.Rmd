@@ -161,9 +161,8 @@ class: middle
 ## ggplot2 
 
 .pull-left[
-```{r echo=FALSE, out.width="80%"}
-knitr::include_graphics("img/ggplot2.jpg")
-```
+![ggplot2](img/ggplot2.jpg)
+
 ] 
 .pull-right[ 
 - **ggplot2** is an R package <sup>1</sup>. 
