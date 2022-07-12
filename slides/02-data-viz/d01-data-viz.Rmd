@@ -161,7 +161,10 @@ class: middle
 ## ggplot2 
 
 .pull-left[
-![ggplot2](img/ggplot2.jpg)
+
+```{r echo=FALSE, out.width="80%"}
+knitr::include_graphics("img/ggplot2.JPG")
+```
 
 ] 
 .pull-right[ 
