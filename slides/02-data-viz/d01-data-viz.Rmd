@@ -237,10 +237,9 @@ class: top
 
 .right-column[
 
-1. .left[Log in to 
-[ https://ranjini-grove.shinyapps.io/hello-ggplot/](https://ranjini-grove.shinyapps.io/hello-ggplot/)]
+1. Log in to [https://ranjini-grove.shinyapps.io/hello-ggplot/](https://ranjini-grove.shinyapps.io/hello-ggplot/)
 
-1. .left[ Work through the `ggplot` tutorial]
+1. Work through the `ggplot` tutorial
 
 
 ]
