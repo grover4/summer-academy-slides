@@ -167,7 +167,7 @@ variable        | description
 ----------------|-------------
 `loan_amount`   |	Amount of the loan received, in US dollars
 `interest_rate` |	Interest rate on the loan, in an annual percentage
-`term`	        | The length of the loan, which is always set as a whole number of months
+`term`	        | The length of the loan, which is rounded to a whole number of months
 `grade`	        | Loan grade, which takes a values A through G and represents the quality of the loan and its likelihood of being repaid
 `state`         |	US state where the borrower resides
 `annual_income` |	Borrower’s annual income, including any second income, in US dollars
@@ -305,19 +305,49 @@ ggplot(data = loans, mapping = aes(x = loan_amount)) +
 .panelset[
 .panel[.panel-name[Plot]
 &lt;img src="d02-viz-num_files/figure-html/unnamed-chunk-10-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+```
+## $x
+## [1] "Loan amount ($)"
+## 
+## $y
+## [1] "Frequency"
+## 
+## $title
+## [1] "Amounts of Lending Club loans"
+## 
+## attr(,"class")
+## [1] "labels"
+```
 ]
 .panel[.panel-name[Code]
 
 ```r
 ggplot(data = loans, mapping = aes(x = loan_amount, 
 *                 color = homeownership)) +
-  geom_histogram(binwidth = 5000,
-                 alpha = 0.5) + #&lt;&lt; controls transparency of color
+  geom_histogram(binwidth = 5000) 
+```
+
+```r
   labs(
     x = "Loan amount ($)",
     y = "Frequency",
     title = "Amounts of Lending Club loans"
   )
+```
+
+```
+## $x
+## [1] "Loan amount ($)"
+## 
+## $y
+## [1] "Frequency"
+## 
+## $title
+## [1] "Amounts of Lending Club loans"
+## 
+## attr(,"class")
+## [1] "labels"
 ```
 ]
 ]
@@ -598,7 +628,7 @@ ggplot(data = loans, mapping = aes(x = annual_income, y=loan_amount, color = hom
 ]
 
 
- <div class="countdown" id="timer_62cf7bc2" style="right:0;bottom:0;" data-warnwhen="0">
+ <div class="countdown" id="timer_62d04c49" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">40</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
