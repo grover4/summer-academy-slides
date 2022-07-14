@@ -336,13 +336,13 @@ ggplot(data = loans, mapping = aes(x = loan_amount, fill = homeownership)) +
 ]
 ]
 
----
+???
 
 class: middle
 
 # Density plot
 
----
+
 
 ## Density plot
 
@@ -351,7 +351,7 @@ ggplot(data = loans, mapping = aes(x = loan_amount)) +
   geom_density()
 ```
 
----
+
 
 ## Density plots and adjusting bandwidth
 
@@ -376,7 +376,6 @@ ggplot(loans, aes(x = loan_amount)) +
 ]
 ]
 
----
 
 ## Customizing density plots
 
@@ -398,7 +397,6 @@ ggplot(data = loans, mapping = aes(x = loan_amount)) +
 ]
 ]
 
----
 
 ## Adding a categorical variable: fill
 
@@ -422,7 +420,6 @@ ggplot(data = loans, mapping = aes(x = loan_amount,
 ]
 ]
 
----
 
 ## Adding a categorical variable: another way
 
