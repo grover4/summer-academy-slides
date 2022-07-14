@@ -30,7 +30,6 @@ class: center, middle, inverse, title-slide
 
 
 
-
 class: middle
 
 # Recap
@@ -76,11 +75,11 @@ ggplot(loans, aes(x = homeownership)) +
   geom_bar()
 ```
 
-&lt;img src="d02-data-viz-cat_files/figure-html/unnamed-chunk-3-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="d03-data-viz-cat_files/figure-html/unnamed-chunk-3-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 ---
 
-## Segmented bar plot
+## Adding a second categorical variable: stacked bar plot
 
 
 ```r
@@ -89,11 +88,11 @@ ggplot(loans, aes(x = homeownership,
   geom_bar()
 ```
 
-&lt;img src="d02-data-viz-cat_files/figure-html/unnamed-chunk-4-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="d03-data-viz-cat_files/figure-html/unnamed-chunk-4-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 ---
 
-## Segmented bar plot
+## Adding a second categorical variable: segmented bar plot
 
 
 ```r
@@ -101,7 +100,7 @@ ggplot(loans, aes(x = homeownership, fill = grade)) +
 * geom_bar(position = "fill")
 ```
 
-&lt;img src="d02-data-viz-cat_files/figure-html/unnamed-chunk-5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="d03-data-viz-cat_files/figure-html/unnamed-chunk-5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -110,10 +109,10 @@ Which bar plot is a more useful representation for visualizing the relationship 
 ]
 
 .pull-left[
-&lt;img src="d02-data-viz-cat_files/figure-html/unnamed-chunk-6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="d03-data-viz-cat_files/figure-html/unnamed-chunk-6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 .pull-right[
-&lt;img src="d02-data-viz-cat_files/figure-html/unnamed-chunk-7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="d03-data-viz-cat_files/figure-html/unnamed-chunk-7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -122,7 +121,7 @@ Which bar plot is a more useful representation for visualizing the relationship 
 
 .panelset[
 .panel[.panel-name[Plot]
-&lt;img src="d02-data-viz-cat_files/figure-html/unnamed-chunk-8-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="d03-data-viz-cat_files/figure-html/unnamed-chunk-8-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[Code]
 
@@ -133,7 +132,6 @@ Which bar plot is a more useful representation for visualizing the relationship 
 * labs(
 *   x = "Proportion",
 *   y = "Homeownership",
-*   fill = "Grade",
 *   title = "Grades of Lending Club loans",
 *   subtitle = "and homeownership of lendee"
 * )
@@ -141,20 +139,20 @@ Which bar plot is a more useful representation for visualizing the relationship 
 ]
 ]
 
----
+???
 
 class: middle
 
 # Relationships between numerical and categorical variables
 
----
+
 
 ## Already talked about...
 
 - Colouring and faceting histograms and density plots
 - Side-by-side box plots
 
----
+
 
 ## Violin plots
 
@@ -164,9 +162,8 @@ ggplot(loans, aes(x = homeownership, y = loan_amount)) +
   geom_violin()
 ```
 
-&lt;img src="d02-data-viz-cat_files/figure-html/unnamed-chunk-9-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="d03-data-viz-cat_files/figure-html/unnamed-chunk-9-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
----
 
 ## Ridge plots
 
@@ -177,7 +174,7 @@ ggplot(loans, aes(x = loan_amount, y = grade, fill = grade, color = grade)) +
   geom_density_ridges(alpha = 0.5)
 ```
 
-&lt;img src="d02-data-viz-cat_files/figure-html/unnamed-chunk-10-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="d03-data-viz-cat_files/figure-html/unnamed-chunk-10-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -193,7 +190,7 @@ ggplot(loans, aes(x = loan_amount, y = grade, fill = grade, color = grade)) +
 ]
 
 
- <div class="countdown" id="timer_62b9f02d" style="right:0;bottom:0;" data-warnwhen="0">
+ <div class="countdown" id="timer_62cf84ce" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">40</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
