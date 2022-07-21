@@ -1,0 +1,765 @@
+---
+title: "Grammar of Data Wrangling"
+subtitle: "Select, filter, mutate, arrange"
+output:
+  html_document:
+    css: ../lab.css
+    highlight: pygments
+    theme: cerulean
+    toc: no
+    toc_float: no
+  pdf_document:
+    toc: no
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+library(tidyverse)
+library(openintro)
+library(fontawesome)
+```
+
+::: {#boxedtext}
+**Learning Objectives**
+
+-   Become more comfortable with the RStudio Interface.
+-   Load and explore a dataset; work with individual rows and columns.
+-   Practice recording written explanations and code chunks in an
+    RMarkdown file and `knit`ing the file into a report.
+-   Learn the syntax for four useful data verbs: select, filter, mutate and arrange.
+
+<!--- -   Create a simple visual summary of the data --->
+:::
+
+Today we begin with the fundamental building blocks of working with data in R. 
+
+
+## Getting Started
+
+Sign into [Rstudio on JupyterHub]( https://jupyter.rttl.uw.edu/2022-summer-upward-bound-stat/user-redirect/rstudio){target="_blank"}. Navigate to the `live-coding` folder and open the file `intro-to-data.Rmd`.  <br>
+
+As a reminder from  our lesson "Hello World", the lower left panel is
+called the *Console* where you can interactively execute R commands. The
+panel in the upper right contains your *Environment*, which will show
+you the variables and the datasets that you are currently working with.
+
+### R Packages
+
+R is an open-source programming language meaning that users can
+contribute R code that make our lives easier, and we get to use them for
+free. In R, shareable code is called a **package** because it usually
+comes bundled with documentation, datasets, etc.
+
+For this lesson, and many others in the future, we will use the following
+two packages:
+
+-   **tidyverse** (an "umbrella" package which houses a suite of many different
+    R packages for data wrangling and visualization, including **ggplot** )
+
+-   **openintro** (data and custom functions from the text "OpenIntro Statistics" )
+
+Let's go ahead and load the packages in our interactive Environment using the
+`library` function in R. To do this, run the
+following two lines in your Console  <sup><a id="ref1" href="#fn1">1</a></sup>. 
+
+
+```{r , message = FALSE}
+library(tidyverse)  #type this in Console
+library(openintro)
+```
+
+Don't worry if you see lines of text appear when you run these commands.
+They are not errors, but information that the package writers want to
+share with the user. For example, if you inspect the message produced by running
+`library(tidyverse)`, you will see that 8 packages are loaded with
+this one call. As indicated in the picture below, each package contains
+R functions geared towards a specific task.
+
+`r knitr::include_graphics("img/tidyverse-packages.png")`
+
+
+The lesson today will introduce you to four useful verbs from the **dplyr**
+package: `select`, `filter`, `mutate` and `arrange`. 
+ <!---You will also make your first plot
+using the `ggplot` package.--->
+
+### The data
+
+To begin exploring the functionality of R, we will work with a real
+dataset. Typically, analysts upload their own external dataset of interest with
+the `Import Dataset` button in the environment panel (datasets can be
+loaded from .txt files, .csv files, Excel files, etc.). However, many R packages have some great datasets that we can access directly once the package has been loaded.
+
+One such dataset is called `arbuthnot` from the `openintro` package. This dataset contains the work
+of Dr. John Arbuthnot, an 18<sup>th</sup> century physician, writer, and
+mathematician. He was interested in the ratio of newborn boys to newborn
+girls, so he gathered the baptism records for children born in London
+for every year from 1629 to 1710.
+
+To take a look at the dataset, type the following in the Console. 
+<!---
+```{r load-data}
+data(arbuthnot)  #type this in Console
+```
+
+The single line of code instructs `R` to load some data: the Arbuthnot baptism counts for boys and girls. You should see that the *Environment* tab in the upper right hand corner of the RStudio window now lists a data set called `arbuthnot` that has 82 observations on 3 variables. (You may have to click on the word "Environment" in the top right if the window is closed)
+
+As you interact with `R`, you will create objects for a variety of purposes. Sometimes you load the objects into your workspace by loading a dataset, as we have done here, but sometimes you create objects yourself as a byproduct of a computation process, for an analysis you have performed, or for a visualization you have created.
+--->
+
+```{r view-data}
+View(arbuthnot)
+```
+
+One advantage of RStudio is that it comes with a built-in data viewer.
+<!---Click on the name `arbuthnot` in the *Environment* pane (upper right
+window) that lists the objects in your environment. This will bring up
+an alternative display of the data set in the *Data Viewer* (upper left
+window).---> This display should feel similar to viewing data in Excel,
+where you are able to scroll through the dataset to inspect it.  However,
+unlike Excel, you **will not** be able to edit the data in this tab.
+Once you are done viewing the data, you can close this tab by clicking
+on the `x` next to its name in the upper left hand pane.
+
+When inspecting the data, you should see four columns of numbers and 82
+rows, each row representing a different year: the first entry in each
+row is simply the row number, the second is the year, and the third and
+fourth are the numbers of boys and girls baptized that year,
+respectively. Use the scroll bar on the right side of the console window
+to examine the complete data set. You can also use the triangles above each column of data to examine the values in the column in increasing or decreasing order.
+
+Note that the row numbers in the first column are not part of
+Arbuthnot's data. R adds them as part of its printout to help you make
+visual comparisons. You can think of them as the index that you see on
+the left side of a spreadsheet. <!---In fact, the comparison to a spreadsheet
+will generally be helpful. R has stored Arbuthnot's data in a kind of
+spreadsheet or table called a *data frame*.
+--->
+
+You can also see the dimensions of this data frame as well as the names of
+the variables and the first few observations by typing:
+
+```{r glimpse-data}
+glimpse(arbuthnot)   #type this in Console
+```
+
+This command should output the following
+
+```{r glimpse-data-result, echo=FALSE, eval=TRUE}
+glimpse(arbuthnot)
+```
+
+which tells us there are 82 observations and 3 variables in this
+dataset. The variable names are `year`, `boys`, and `girls` and they are
+of integer type. 
+
+At this point, you might notice that 
+commands in R look a lot like functions from math class; that is,
+invoking R commands means supplying a function with some number of
+arguments. The `glimpse` command, for example, took an argument $x$ which was the name of a data frame. It has an additional argument `width` which defaults to the width of your console. 
+
+
+To learn more about the data, type the following in your Console:
+```{r}
+?arbuthnot    #or help(arbuthnot)
+```
+
+### Creating a reproducible report
+
+Remember that we will be using R Markdown to to save your answers and work to the questions marked as **Exercises**.
+
+
+<!--- Please be very intentional about where you save your lab report, preferably in a folder called `labs` and call the file `data-basics`. (It is also a good idea to set the working directory for the Console to point to this folder. )
+
+* From the toolbar in RStudio, select `File` -> `New File` -> `R Markdown`
+
+* In the prompt window that pops up, select `From Template` and then select the `Lab Report` template from the ``openintro`` package.
+--->
+
+Personalize the header by editing the author as we did
+previously. Generally, all code that is necessary for your solution should be typed in code chunks in your Rmarkdown document. Because `View` and `help` are used to explore the data interactively, they **do not** need to be included in your report. 
+
+
+As a reminder, You can execute the `R` code you type in code chunks by knitting the entire document. But often, you may want to run just the code chunk you are working on by running it from the Console. There are two ways to submit a single line of `R` code to the Console for execution: 
+
+ - place your cursor on the line of code and press `Ctrl-Enter` or `Cmd-Enter` at the same time, or 
+ 
+ - place your cursor on the line and press the "Run" button in the upper right hand corner of the R Markdown file. 
+ 
+ Alternatively, if you wanted to run all of the `R` code in a given code chunk, you can click on the "Play" button in the upper right hand corner of the code chunk (green sideways triangle).
+
+If at any point you need to start over and run all of the code chunks before a specific code chunk, you click on the "Fastforward" button in the upper right hand corner of that code chunk (gray upside down triangle with a bar below). This will run every code chunk that occurred *before* that code chunk, but *will not* execute the `R` code included in that code chunk.
+
+
+**Be sure to number and answer each exercise in complete sentences in your RMarkdown report. If an exercise requires you to write code, create a new code chunk and label it by the exercise number. **
+
+
+1. What does each row in the `arbuthnot` data frame describe? A year, a birth, London, Arbuthnot? No code needed. Write your answer in a complete sentence. 
+
+
+
+## Manipulating the data
+
+Today we will learn about four verbs from the **dplyr** package that we can use to wrangle our datasets. They are **select**, **filter**, **mutate** and **arrange**. Each takes a dataframe as input and does something to it. Let's see what each
+one does and how to use them. 
+
+
+### **Select**ing a column
+
+<!---Create a new code chunk in your document, label it `select-column` and type the commands from this section in it. Feel free to write yourself notes in the document as well once you understand what each command does. This can help you internalize what you are learning. --->
+
+We can access the data in a single column of
+a data frame using the command:
+
+```{r view-boys}
+arbuthnot$boys   #type in Console   
+```
+
+This command will only show the number of boys baptized each year. The
+dollar sign basically says "go to the data frame named `arbuthnot` and
+find the column called `boys`. While the dollar sign is still commonly
+used in R, functions in the tidyverse package allow us to extract the same
+information in a different way. 
+
+Type the following command in the Console and run it:
+
+```{r}
+select(arbuthnot, boys)    #type in Console  
+```
+
+The first argument is the dataframe and the second is the column we want to select.
+The advantage of `select` is that we can select several
+columns at once, which we cannot do with the dollar sign approach. 
+```{r }
+select(arbuthnot, boys, girls) #type in Console
+```
+
+You may also have noticed a subtle difference in the way that R printed the
+data for the previous commands. For `arbuthnot$boys`, R printed a
+list of 82 numbers that were no longer displayed as a table. Objects
+that print out in this way are called *vectors*; they represent a set of
+numbers. 
+
+For `select(arbuthnot, boys)`, R printed the first 10 rows of a table with 82
+rows and 1 column. This is because when you call `select(arbuthnot, boys)`, R actually creates 
+a new, smaller data frame. This is common to all functions in the `dplyr` package. 
+
+What command would you use to extract the `girls`? Try it in the Console.
+
+
+There are a variety of helper functions that make it easy to select large numbers of columns, and you will hear more about this later.
+
+An important operator that we will discuss next is the **pipe** denoted by `%>%`. In short, it enables us to pipe an argument forward into a function, something along the lines of `x %>% f` rather than `f(x)`. 
+
+As an example, when we type
+
+```{r}
+arbuthnot %>% select(boys)    #type in Console
+```
+
+we are saying "take the arbuthnot dataset and
+supply it as input to the first argument of select function".  The main advantage of the pipe operator is that it allows us to string several commands together.  
+
+
+### **Filter**ing rows
+
+Apart from `select()`, another useful function for subsetting a dataset is `filter()`. While
+`select()` lets us isolate columns of a dataset, `filter()` lets
+us isolate rows which satisfy certain attributes. Like select, the first argument is the data frame (which may supplied via the pipe operator) and the second states the criteria which must be satisfied.
+
+What does the following line of code do?
+
+
+```{r}
+arbuthnot %>% filter(year > 1685)  #type in Console
+```
+
+Try it in the Console!
+
+The most commonly used logical operators for filtering are given below:
+
+-   `==` means "if equal to"
+-   `!=` means "not equal to"
+-   `&` means "and"
+-   `|` means "or"
+-   `>` means "greater than"
+-   `<` means "less than"
+-   `>=` means "greater than or equal to"
+-   `<=` means "less than or equal to"
+
+
+**Write code to answer the questions below. Then run it and answer the questions in complete sentences immediately below each code chunk.**
+
+2. How many boys were baptized in the year 1685. 
+
+```{r include=FALSE}
+arbuthnot %>% 
+   filter(year == 1685) 
+```
+
+We will now see our first example of piping two commands together. Suppose we want to know how often more than 5,000 girls were baptized.  We first use `filter` to extract the rows that have girls $>$ 5000. Then we go ahead and count the number of rows using `nrow`. This is shown below. Try it.
+
+```{r}
+arbuthnot %>% filter(girls > 5000) %>% nrow()  #type in Console
+```
+
+For ease of reading, you may break up the code over several lines so each task is on a separate line. 
+
+```{r}
+arbuthnot %>% 
+   filter( girls > 5000 ) %>%
+   nrow()
+```
+
+When breaking up lines of code however, be careful to make sure that each line is syntactically incomplete, so R knows that there is more coming. For example, placing the `%>%` at the end of a line rather than the beginning of the next line does the trick.
+
+
+
+3. How often were more girls than boys baptized? 
+
+**Don't forget, we need to see both the code and also the answer to the question in a complete sentence.**
+
+
+```{r include=FALSE}
+arbuthnot %>%
+  filter(girls > boys) %>% 
+   nrow()
+```
+
+### **Mutate** new columns
+
+The third verb we will learn about today is `mutate`. It enables us to
+create new columns in our dataset. For example, suppose we want to know the total
+number of baptisms in a year. To compute this, we could use the fact that R is
+really just a big calculator. We can type in mathematical expressions
+like
+
+```{r calc-total-bapt-numbers}
+5218 + 4683
+```
+
+to see the total number of baptisms in 1629. We could repeat this once
+for each year, but there is a faster way. We can have R create a new
+variable for us, and we can define this new variable with a mathematical
+expression. Try out the following code in the Console:
+
+```{r calc-total-bapt-vars-dont-save}
+arbuthnot %>% mutate(total = boys + girls)  #type in Console
+```
+
+This should print the
+desired dataframe (arbuthnot with the new `total` column). Take a look at the data in the data viewer. Has the column `total` been added to the dataset?
+
+To **add** the new column to the dataset, you will need to assign the output from the previous command using the assignment operator `<-`. 
+
+```{r calc-total-bapt-vars-save}
+arbuthnot <- arbuthnot %>%     #type in Console
+                mutate( total = boys + girls) 
+```
+
+You should see that there is now a data set called `arbuthnot` that has been loaded into your working environment. View it to see the new column called `total` that has been tacked on. You have 
+changed the dataset using `mutate`!
+
+Note: the new data set name can be anything you like, including the original name. Keep in mind that no matter what you call it, this is your local copy of the data set. 
+
+**The following exercise only involves writing code. You should of course check that your code works by submitting it to the Console for execution and then taking a look at the data frame.**
+
+4. Create and add a new variable `ratio` to `arbuthnot` which contains the ratio of boy baptisms to girl baptisms for each year. View the data to see which year had the largest boy:girl ratio.
+
+```{r include=FALSE}
+
+arbuthnot <- arbuthnot %>% 
+  mutate(ratio = boys/girls) 
+```
+
+<!--- Finally, in addition to simple mathematical operators like subtraction
+and division, we often create new variables by using logical operators like greater than, `>`,
+less than, `<`, and equality, `==` and even conditional `ifelse` statements. For example, we can ask if the
+number of baptisms of boys outnumber that of girls and create a new variable which takes the value "yes" or "no" depending on the answer.
+
+```{r boys-more-than-girls}
+arbuthnot <- arbuthnot %>%     #type in Console
+  mutate(more_boys = ifelse(boys > girls, "yes", "no")) 
+```
+
+What type of variable is `more_boys`?
+
+It is a categorical variable --->
+
+### **Arrange** in order
+
+A large part of initial data exploration is examining the values taken by relevant variables. The verb `arrange` orders the rows of a data frame in increasing order by the values of selected columns. 
+
+For example, say we want to know the year with the most female baptisms. Conceptually, we would first sort your data set in decreasing order based on the `girls` column. You can do this interactively in the data viewer by clicking on the arrows next to the variable names. To include the sorted result in your report however you will need to use two new functions. First we use `arrange()` to sort the `girls`variable. Then we can arrange the data in a descending order with another function, `desc()`, for descending order. The sample code is provided below. Try it in the Console. 
+
+```{r sample-arrange, eval=FALSE}
+arbuthnot %>%
+  arrange(desc(girls))   # type in Console
+```
+
+
+5. Which year had the most boys being baptized? Use `arrange` and `desc` in a code chunk to find out.  
+
+**Don't forget, we need to see your code and also the answer to the question in a complete sentence.**
+
+```{r include=FALSE}
+arbuthnot %>%
+  arrange(desc(boys))
+
+```
+
+## More Practice
+
+In the previous exercises, you conducted some preliminary analysis of Arbuthnot's baptism data. For more practice, repeat these steps but for present day birth records in the United States. The data are stored in a data frame called `present` in the `openintro` package and come from reports by the Centers for Disease Control. You can learn more about them by bringing up the help file using the command `?present`.
+
+
+Answer the following questions with the `present` data frame. 
+
+
+6. Which years are included in the `present` data set? What are the dimensions of the data frame `present`? What are the variable (column) names?
+
+
+7. How often were more boys than girls born?
+
+
+8. Create and add a new column called `total` which contains the total number of births in the year. Bonus: make a scatter plot of `total` on the $y$ axis versus `year` on the $x$ axis!
+
+<!--- - How do these counts compare to Arbuthnot's? Are they of a similar magnitude?
+
+*Hint* To find the minimum and maximum values of columns, you can use the functions `min()` and `max()` within a `summarize()` call, which you will learn more about in the following lab.
+
+Here's an example of how to find the minimum and maximum amount of male births in a year:
+
+```{r summarize min and max}
+arbuthnot %>%
+  summarize(min = min(boys),
+            max = max(boys)
+            )
+```
+
+--->
+
+
+
+
+<!---This command adds a new variable called `more_boys` to the `arbuthnot` dataframe containing
+the values of either `TRUE` if that year had more boys than girls, or
+`FALSE` if that year did not (the answer may surprise you). This
+variable contains a different kind of data than we have encountered so
+far. All other columns in the `arbuthnot` data frame have values that
+are numerical (the year, the number of boys and girls). Here, we've
+asked R to create *logical* data, data where the values are either
+`TRUE` or `FALSE`. In general, data analysis will involve many different
+kinds of data types, and one reason for using R is that it is able to
+represent and compute with many of them.
+
+--->
+
+
+<!---
+### Creating a reproducible lab report
+
+In RStudio, go to New File -\> R
+Markdown... Then, choose `From Template` and then choose `Lab Report` from openintro. 
+
+Personalize the header by editing the title and author. A good choice for the title is `Lab 2: Data Basics`. Generally, all code that is necessary for your solution should be typed in code chunks in your Rmarkdown document. Because `data`, `glimpse`, and `?`  are used to explore the data interactively, they are not necessary for your solution code and **do not** need to be included in your solution file. 
+
+Go ahead and create a code chunk in your Rmarkdown document by typing three tick marks (\`\`\`), followed by two curly braces that contain a lowercase letter r ({r}). Give the code chunk a name while you're at it, such as ` ```{r load-packages}``` ` and attach the `openintro` and `tidyverse` packages using the `library` command.  
+
+You can execute the `R` code you type in these code chunks similar to how you typed code into the console and pressed enter/return. From within the code chunk there are two ways to submit a line of `R` code to the console for execution: 
+
+ - place your cursor on the line on code and press `Ctrl-Enter` or `Cmd-Enter` at the same time, or 
+ 
+ - place your cursor on the line and press the "Run" button in the upper right hand corner of the R Markdown file. 
+ 
+ Alternatively, if you want to run all of the `R` code to preview the document, you can click on `Knit`.
+ 
+Going forward, create a new code chunk for each exercise listed below and write your code in it. 
+
+3. **Quiz question** How many flights headed from JFK to LAX?
+*Hint* Filter by specifying `origin` and `dest`.
+
+4. **Quiz question**  Create a new variable ` 
+
+5. **Quiz question** 
+in a given code chunk, you can click on the "Play" button in the upper right hand corner of the code chunk (green sideways triangle).
+
+If at any point you need to start over and run all of the code chunks before a specific code chunk, you click on the "Fastforward" button in the upper right hand corner of that code chunk (gray upside down triangle with a bar below). This will run every code chunk that occurred *before* that code chunk, but *will not* execute the `R` code included in that code chunk.
+
+
+
+## Data Visualization
+
+R has some powerful functions for visual summaries of *univariate* or
+*bivariate* data.
+
+Let's start with univariate data. Perhaps we want a visual summary of a
+single variable, such as the number of girls baptized in a given year.
+We could choose to display this with a histogram.
+
+```{r}
+ggplot(data = arbuthnot, mapping=aes(x = girls)) +
+  geom_histogram(binwidth=500)
+```
+
+If you run the plotting code in your console, you should see the plot
+appear under the *Plots* tab of the lower right panel of RStudio. We can
+use the powerful `ggplot()` function to build all sorts of plots. The
+format of the code to build different types of plots with `ggplot()`
+tends to follow a similar format.
+
+-   The first argument is always the dataset.
+
+-   Next, you provide the variables from the dataset to be assigned to
+    `aes`thetic elements of the plot, e.g. the x and the y axes. Here,
+    for a univariate display, we only have an x variable.
+
+-   Finally, you use another layer, separated by a `+` to specify the
+    `geom`etric object for the plot. Since we want a histogram, we use
+    `geom_histogram`
+
+-   Specific types of plots have their own unique extra arguments. For a
+    histogram, we can specify the binwidth. As with many R functions,
+    one can also opt to go with the default choice and not specify any
+    arguments.
+
+On your own time, try modifying the above code with different bin
+widths. Which bin width seems to best show the distribution of the data?
+
+Sometimes we want a bi-variate visual summary of our data to explore the
+relationship between two variables. For example, suppose we want to see
+how the number of girls baptized each year has changed over time. We can
+create a scatter plot of the variable `girls` against the variable
+`year`.
+
+```{r plot-girls-vs-year}
+ggplot(data = arbuthnot, mapping=aes(x = year, y = girls)) + 
+  geom_point()
+```
+
+Notice that the command looks just like our histogram command, but now
+we have both an X and a Y variable, and we are creating a scatterplot
+(`point`) instead of a histogram. If you wanted to visualize the above
+plot using a line graph, you would replace `geom_point()` with
+`geom_line()`.
+
+```{r plot-girls-vs-year-line}
+ggplot(data = arbuthnot, mapping=aes(x = year, y = girls)) + 
+  geom_line()
+```
+
+You might wonder how you are supposed to know the syntax for the
+`ggplot` function. Thankfully, R documents all of its functions
+extensively. To learn what a function does and its arguments that are
+available to you, just type in a question mark followed by the name of
+the function that you're interested in. Try the following in your
+console:
+
+```{r plot-help, tidy = FALSE}
+?ggplot
+```
+
+Notice that the help file replaces the plot in the lower right panel.
+You can toggle between plots and help files using the tabs at the top of
+that panel.
+
+3.  Is there an apparent trend in the number of girls baptized over the
+    years? How would you describe it? (In your RMarkdown document, be
+    sure to practice including the code needed to make the plot as well
+    as your written interpretation.)
+
+You can make a line plot of the total number of baptisms per year with
+the command
+
+```{r plot-total-vs-year}
+ggplot(data = arbuthnot, mapping=aes(x = year, y = total)) + 
+  geom_line()
+```
+
+4.  Now, generate a line plot of the proportion of boys born over time.
+    What do you see?
+
+
+
+### Numerical Summaries: means and more
+
+Suppose that instead of visual summaries, we want numerical summaries of our data. This is quite easy using the tidyverse. Try out some of the following commands and discuss with your neighbor: what do you think these commands are doing?
+
+```{r}
+arbuthnot %>% summarize(av_girls = mean(girls), av_boys = mean(boys))
+arbuthnot %>% summarize(sd_girls = sd(girls), sd_boys =sd(boys))
+```
+
+<!-- <div id="boxedtext"> -->
+                                                                                                              
+<!-- **Summary statistics: ** Some useful function calls for summary statistics for a  -->
+
+<!-- single numerical variable are as follows: -->
+
+<!-- - `mean` -->
+
+<!-- - `median` -->
+
+<!-- - `sd` -->
+
+<!-- - `var` -->
+
+<!-- - `IQR` --> 
+
+<!-- - `min` -->
+
+<!-- - `max` -->
+
+<!-- - `n` -->
+
+<!-- Note that each of these functions takes a single vector as an argument and  -->
+
+<!-- returns a single value.  -->
+
+
+<!-- </div> 
+
+We can also view the five-number-summary for boys and girls separately. We do this in a slightly different way because "five-number-summary" (or just ``summary()`` in R) is not a command that returns a single value. 
+
+```{r}
+arbuthnot %>% select(girls) %>% summary()
+arbuthnot %>% select(boys) %>% summary()
+```
+
+The ``summary()`` function in R provides the 5-number summary with the added bonus of the mean. It is a useful to way to get a sense of the spread of the data, as well as the center of the data. 
+
+1. On average, were more boys or more girls baptized? Does your answer change if you use a different measure of center? 
+
+
+## R As  
+
+Suppose we want to plot the total number of baptisms. To compute this, we 
+could use the fact that R is really just a big calculator. We can type in 
+mathematical expressions like
+
+```{r calc-total-bapt-numbers-1}
+5218 + 4683
+```
+
+to see the total number of baptisms in 1629. We could repeat this once for each 
+year, but there is a faster way. We can have R create a new variable for us, and we can define this new variable with a mathematical expression. Try out the following code: 
+
+```{r calc-total-bapt-vars-save-1}
+arbuthnot <- arbuthnot %>%
+  mutate(total = boys + girls)
+```
+
+You have made a change to your dataset! To view the changes, click on the name of the dataset in your ``environment`` again to update it in the data viewer. You'll see that there is now a new column called `total` that has been tacked on
+to the data frame. Our code is equivalent to going through each row and adding up the `boys` 
+and `girls` counts for that year and recording that value in a new column called
+`total`.
+
+<div id="boxedtext">
+Suppose that we had only run the code `arbuthnot %>%
+  mutate(total = boys + girls)`. 
+This would print the desired dataframe (arbuthnot with the new `total` column), but would not save it anywhere. The special symbol `<-` performs an *assignment*, taking the 
+output of one line of code and saving it into an object in your environment. In 
+this case, you already have an object called `arbuthnot`, so this command updates
+that data set with the new mutated column.
+</div>
+
+You can make a line plot of the total number of baptisms per year with the 
+command
+
+```{r plot-total-vs-year-1}
+ggplot(data = arbuthnot, aes(x = year, y = total)) + 
+  geom_line()
+```
+
+Similarly, you can compute the boy-to-girl ratio or the proportion of newborns that are born in each year with the following commands. 
+
+```{r calc-prop-boys-to-girls-vars-1}
+arbuthnot <- arbuthnot %>%
+  mutate(boy_to_girl_ratio = boys / girls, boy_prop = boys / total)
+```
+
+Note that we are using the new `total` variable we created earlier in our 
+calculations.
+
+3. Now, generate a plot of the proportion of boys born over time. What do you see? 
+
+Finally, in addition to simple mathematical operators like subtraction and 
+division, you can ask R to make comparisons like greater than, `>`, less than,
+`<`, and equality, `==`. For example, we can ask if the number of births of boys
+outnumber that of girls in each year with the expression
+
+```{r boys-more-than-girls-1}
+arbuthnot <- arbuthnot %>%
+  mutate(more_boys = boys > girls)
+```
+
+This command adds a new variable to the `arbuthnot` dataframe containing the values
+of either `TRUE` if that year had more boys than girls, or `FALSE` if that year 
+did not (the answer may surprise you). This variable contains a different kind of 
+data than we have encountered so far. All other columns in the `arbuthnot` data 
+frame have values that are numerical (the year, the number of boys and girls). Here, 
+we've asked R to create *logical* data, data where the values are either `TRUE` 
+or `FALSE`. In general, data analysis will involve many different kinds of data 
+types, and one reason for using R is that it is able to represent and compute 
+with many of them.
+
+One interesting aspect of logical data is that R actually treats the value `TRUE` as `1` and `FALSE` as `0`. That means that if we want to know the total number of years in which the number of boys exceed the number of girls, we can just as R for a `sum` of the `more_boys` variable.
+
+```{r}
+arbuthnot %>% summarize(num_years_more_boys = sum(more_boys))
+```
+
+Interestingly, there are only 82 rows in the whole dataset! This means that, in every single year, more boys than girls were baptized. 
+--->
+
+* * *
+
+## Ending Your Session
+
+Congratulations! You made it through your second R session! 
+
+
+Your report (.Rmd) and the html (.html) output file should remain in your directory on the server, so long as you saved them. 
+
+To quit RStudio, type `q()` in the console window or click `r knitr::include_graphics("../01-hello-world/img/stop.PNG")`
+ on the top right. 
+
+## Additional Resources
+
+That was a short introduction to working with data in R, but we
+will provide you with more functions and a more complete sense of the
+language as the course progresses.
+
+In this course we will be using the suite of R packages from the
+**tidyverse**. The book [R For Data Science](https://r4ds.had.co.nz/) by
+Grolemund and Wickham is a fantastic resource for data analysis in R
+with the tidyverse. If you are googling for R code, make sure to also
+include these package names in your search query. For example, instead
+of googling "scatterplot in R", google "scatterplot in R tidyverse".
+
+These cheatsheets may come in handy throughout the semester:
+
+-   [RMarkdown
+    cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf)
+-   [Data transformation
+    cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+-   [Data visualization
+    cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf)
+
+Note that some of the code on these cheatsheets may be too advanced for
+this course. However the majority of it will become useful throughout
+the semester.
+
+* * *
+
+
+::: {#license}
+This is a product of OpenIntro that is released under a [Creative
+Commons Attribution-ShareAlike 3.0
+Unported](http://creativecommons.org/licenses/by-sa/3.0). This lab was
+adapted for OpenIntro by Andrew Bray and Mine Çetinkaya-Rundel from a
+lab written by Mark Hansen of UCLA Statistics.
+:::
+
+
+<sup id="fn1">1. R packages need to be installed before you can use them. To install a package, you will need to type `install.package("<package name here>")` at the prompt in the console. You only need to *install* packages once, but you need to *load* them each time you relaunch RStudio. To see the list of packages available to you, click on the *Packages* tab in the lower right hand pane.
