@@ -1,0 +1,407 @@
+---
+title: "What will you major in?"
+subtitle: "select, filter, mutate, oh my"
+output: 
+  html_document:
+    css: ../lab.css
+    highlight: pygments
+    theme: cerulean
+    toc: no
+    toc_float: no
+  pdf_document:
+    toc: no
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+#load packages -------------------------------------
+
+library(tidyverse)
+library(fivethirtyeight)
+library(gt)
+
+#set option for chunks
+knitr::opts_chunk$set(eval = FALSE)
+
+```
+
+Today we will delve further into wrangling data using dplyr functions from tidyverse.  We will learn to calculate summary statistics with group_by() and summarize().  
+
+<div id="boxedtext">
+
+**Learning Objectives**
+
+- Continue practising data manipulation with `select`, `filter`, `mutate` and `arrange`. 
+- Learn `group_by` and `summarize`
+
+</div>
+
+* * * 
+
+## Getting started
+
+Sign into [Rstudio on JupyterHub]( https://jupyter.rttl.uw.edu/2022-summer-upward-bound-stat/user-redirect/rstudio){target="_blank"}. Navigate to the `live-coding` folder and open the file `more-data-wrangling.Rmd`.  <br>
+
+
+We begin the lab with  helpful reminders on knitting documents and loading packages.
+
+### Knitting documents
+
+In order to **knit** your document correctly, you need to make sure that **all** the files your code needs to run are in the same directory as the Rmarkdown file. This includes external data files, graphics, etc. We also recommend knitting your lab report each time you complete an exercise. **Do not wait until you are all done with the assignment to try knitting for the first time**. You may be in for a rude surprise!
+
+### Loading packages
+
+As mentioned before, the first step in most of our labs will be to load the R packages that we use. In this lab we will work with the **tidyverse** package and the **fivethirtyeight** package for the data. If you are using the RStudio server, the packages have already been **installed**, so we do not need to re-install them. We just need to load them by running `library()` command. Type the following in the console to load the packages in the working environment.
+
+
+```{r load-packages, message=FALSE}
+library(tidyverse)             #type in Console
+library(fivethirtyeight)
+```
+
+
+* * *
+
+## Introduction
+
+![Photo by Pang Yuhao on Unsplash](img/pang-yuhao-_kd5cxwZOK4-unsplash.jpg)
+
+The first step in the process of turning information into knowledge is to summarize and describe the raw information - the data. 
+In this assignment, we explore data on college majors and earnings, specifically the data behind the FiveThirtyEight story [*The Economic Guide To Picking A College Major*](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/).
+
+
+These data originally come from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series. 
+While this is outside the scope of this assignment, if you are curious about how raw data from the ACS were cleaned and prepared, see [the code](https://github.com/fivethirtyeight/data/blob/master/college-majors/college-majors-rscript.R) FiveThirtyEight authors used.
+
+We should also note that there are many considerations that go into picking a major. 
+Earnings potential and employment prospects are two of them, and they are important, but they do not tell the whole story. 
+Keep this in mind as you analyze the data.
+
+
+## The data
+
+The data frame we will be working with today is called `college_recent_grads` and it is in the fivethirtyeight package. 
+
+Begin by viewing the `college_recent_grads` data frame. Type the following command in the Console. Note that we highly recommend typing these commands, rather than copying and pasting them. This will ensure that the commands themselves are sinking in, and you will start to see how different commands relate to one another. 
+
+```{r load-data}
+View(college_recent_grads)  #type in Console
+```
+
+<!--- The data set `college_recent_grads` shows up in your workspace. R has stored this data set as a **data frame**. Each row represents an *observation* and each column represents a  *variable*. To view the dataset, click on it in your `Environment` pane. 
+
+--->
+
+You can use `glimpse` to take a quick peek at your data. 
+
+```{r glimpse}
+glimpse(college_recent_grads)  #type in Console
+```
+
+It is also important to read the helpfile for the data set if available.  This documentation can give us more details on what the variables mean and their units.
+
+```{r doc}
+?college_recent_grads #type in Console
+```
+
+
+Answer the questions marked as exercises. Be sure to include any code chunks for each exercise.
+
+1. What does each row in the dataset describe?  A major? A major category?
+
+<!-- Solution: Each row of the dataset represents a major.  -->
+
+
+## Analysis
+
+Let's think about some questions we might want to answer with these data:
+
+- Which major has the lowest unemployment rate?
+- Which majors have the lowest underemployment rate? 
+- Which major has the highest percentage of women?
+- What are the popular major categories?
+- How do the distributions of median income compare across major categories?
+
+In the next section you will answer these questions.
+
+
+### Majors and unemployment rate
+
+In order to see which majors have the *lowest* unemployment rate, all we need to do is sort the data. We use the `arrange()` function to do this, and sort it by the `unemployment_rate` variable. 
+By default, arrange sorts from smallest to largest, which is what we want here – we’re interested in the major with the *lowest* unemployment rate.
+
+Try it! Take a look at the slides from Week 3 on our CANVAS home page if you are stuck. 
+
+
+2. What are the majors with the lowest unemployment rates? Write code to show the name of the major and also the unemployment rate for the 10 majors with the lowest unemployment rates.
+
+```{r include=FALSE}
+college_recent_grads %>% 
+  arrange(unemployment_rate) %>% 
+   select(major, unemployment_rate) %>%
+   slice_head( n = 10)
+
+```
+
+<!---the number of rows sliced is flexible and up to them --->
+
+### Majors and underemployment rate
+
+According to the one of the sections of the [FiveThirtyEight story](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), researchers have found that while unemployment rates are falling among recent graduates, underemployment - having a job that does not require a college degree - is rising. 
+
+
+In the next exercise you will  create a new variable:
+
+$$underempl\_rate =\frac{non\_college\_jobs + low\_wage\_jobs}{ college\_jobs + non\_college\_jobs + low\_wage\_jobs}$$
+
+and then use `arrange` to sort its values. See **Mutate a new variable** from Week 3 slidedecks if you are stuck.
+
+
+3. 
+Create and add a new variable called `underempl_rate` to the dataset which shows the underemployment rate for each major. What are the majors with the lowest `underempl_rate`? Write code to show the name of the major and also the underemployment rate for the 10 majors with the lowest unemployment rates.  
+
+```{r include=FALSE}
+college_recent_grads %>% 
+   mutate(underempl_rate=(non_college_jobs+low_wage_jobs)/
+            (college_jobs + non_college_jobs + low_wage_jobs)) %>%
+  arrange(underempl_rate) %>% 
+  select(major, underempl_rate) %>% 
+  slice_head( n = 10)
+
+```
+
+
+### Women in majors
+
+In order to see which majors have the highest proportion of women, all we need to do is sort the data on `sharewomen`. We can use the `arrange` function as we did in the previous exercises but with the `desc` option to see the highest values first. 
+
+4.  What are the top ten majors with the highest `sharewomen`? Please follow instructions in previous exercises.
+
+```{r include=FALSE}
+
+college_recent_grads %>%
+  arrange(desc(sharewomen)) %>% 
+  select( major, sharewomen) %>% 
+  slice_head(n=10)
+
+```
+### Popular majors
+
+Just for fun, go ahead and use what you have learned so far to see which are the most popular majors in this data set. The variable `total` shows the total number of people with each major. 
+
+5. Which is the most popular major in this data set? Follow instructions in the previous exercises  and list the top 10 most common majors in this data.
+
+```{r include=FALSE}
+
+college_recent_grads %>% 
+  arrange(desc(total)) %>%
+  select(major, total) %>% 
+  slice_head(n=10)
+
+```
+
+
+### Majors and income
+
+How do the majors compare in terms of earning potential? 
+
+6. Pick a `major_category` that interests you and rank the majors *within* that category  in descending order of `median` income. For ease of viewing, please only show the `major` and `median` columns in your output.
+
+```{r include = FALSE}
+college_recent_grads %>% 
+  filter(major_category == "Computers & Mathematics") %>% 
+  arrange(desc(median)) %>% select(major, median)
+
+```
+
+
+7. Make a faceted histogram to compare the `median` income by `major_category`. Play around with the number of rows, columns and also the binwidth so you are able to view all the facets properly.
+
+```{r include = FALSE}
+ggplot(college_recent_grads, 
+       aes(x = median))+
+  geom_histogram(binwidth = 3000) + 
+  facet_wrap(~major_category, ncol = 3)
+```
+
+
+Next, we will learn how to calculate average income for each major category. For example, say we want to know whether a major in Business pays better than one in Engineering on average. 
+
+We need to do a few things to answer this.  First, we need to **group by**  `major_category`. Then we need to **summarize** the incomes within each category by calculating their average (or mean).
+
+
+
+<!--- There are three types of incomes reported in this data frame: `p25th`, `median`, and `p75th`. 
+These correspond to the 25th, 50th, and 75th percentiles of the income distribution of sampled individuals for a given major.
+
+The question we want to answer is "How do the distributions of median income compare across majors?". Each major belongs to a major category (see table below) and we will look at the average income earned within each discipline. ---> 
+
+```{r group-by, echo=FALSE, eval=TRUE}
+
+college_recent_grads %>% 
+  arrange(major_category) %>%
+  filter(major_category == "Business"|major_category == "Engineering") %>%
+  select( major_category, major, median) %>%
+  gt(caption="Majors color-coded by discipline") %>%
+  tab_style(
+    style = list(
+      cell_fill(color = "lightyellow"),
+      cell_text(font="x-small")
+      ),
+    locations = cells_body(
+      columns = c(major_category,major,median),
+      rows = (major_category=="Biology & Life Science") == TRUE) 
+  ) %>%
+    tab_style(
+    style = list(
+      cell_fill(color = "lightcyan"),
+      cell_text(font="x-small")
+      ),
+    locations = cells_body(
+      columns = c(major_category,major,median),
+      rows = (major_category == "Business") == TRUE) ) %>%
+      tab_style(
+    style = list(
+      cell_fill(color = "purple", alpha=0.1),
+      cell_text(font="x-small")
+      ),
+    locations = cells_body(
+      columns = c(major_category,major,median),
+      rows = (major_category == "Communications & Journalism") == TRUE)
+      ) 
+```
+
+<!--- We need to do a few things to answer the question of how incomes compare across disciplines.  First, we need to **group** the data by  `major_category`. Then we need to average across the incomes within a category. 
+
+6.  How many majors are included in the "Computers & Mathematics" discipline? Write your answer in a complete sentence, show your code and output. *Hint* Filter the rows that satisfy `major_category == "Computers & Mathematics"`. 
+
+```{r include=FALSE}
+college_recent_grads %>% 
+  filter(major_category == "Computers & Mathematics") %>%
+  nrow()
+
+```
+
+<!--- We need to do a few things to answer the question of how incomes compare across disciplines.  First, we need to **group** the data by  `major_category`. Then we need to average across the incomes within a category. 
+
+For example, the following majors are categorized as "Business". 
+
+```{r business-styled, eval=TRUE, echo=FALSE, warning=FALSE}
+college_recent_grads %>% 
+  filter(major_category == "Business") %>%
+  select(major_category, major, median) %>%
+  gt() %>%
+  tab_style( 
+    style=list( 
+      cell_fill(color="lightyellow"),
+      cell_text( size="x-small") ),
+    locations=cells_body( 
+      columns=c(median) )
+  )
+
+```
+
+We can then summarize the `median` variable by taking its average across all 11 rows. 
+--->
+
+The `group_by` function in dplyr establishes groups based on the variable we specify.  The `summarize` function when used after a `group_by` will calculate summaries within each group.
+
+
+
+Run the following code chunk in the Console by clicking the green arrow. It calculates the average of `median` income by `major category`.
+
+```{r echo=TRUE}
+
+college_recent_grads %>% 
+  group_by(major_category) %>%
+  summarize( avg_income = mean(median) )
+
+
+```
+
+
+Note from the output that the `summarize` function creates a data frame containing just one variable `avg_income`. The variable name is specified by you, the user. The name is optional but helpful especially if you want to pipe the result to `arrange` to sort in order.
+
+7. Which major category has the highest `avg_income`?  *Hint* pipe the data frame created in the code chunk to `arrange` and sort on `avg_income`.
+
+```{r include=FALSE}
+
+college_recent_grads %>% 
+  group_by(major_category) %>%
+  summarize( avg_income = mean(median) ) %>%
+  arrange(desc(avg_income) ) %>%
+  slice_head(n = 5)
+
+
+```
+
+
+
+Together, `group_by` and `summarize` open up a lot of possibilities for calculating interesting summaries of the data. We will use them a lot in subsequent analyses!
+
+
+<!---
+### All STEM fields aren't the same!
+
+`r knitr::include_graphics("img/purity.png")`
+
+One of the sections of the [FiveThirtyEight story](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/)  states that when it comes to earnings, many sciences, particularly the life sciences, pay below the overall median for recent college graduates.
+Let’s see if this is true.
+
+
+First, let’s create a new vector called stem_categories that lists the major categories that are considered STEM fields.
+
+```{r stem-categories-vector-ex, exercise=TRUE}
+stem_categories <- c("Biology & Life Science",
+                     "Computers & Mathematics",
+                     "Engineering",
+                     "Physical Sciences")
+```
+
+Then, we can use this to create a new variable in our data frame indicating whether a major is STEM or not.
+
+```{r stem-or-not-ex, exercise=TRUE}
+college_recent_grads <- college_recent_grads %>%
+  mutate(major_type = ifelse(major_category %in% stem_categories, "stem", "not stem"))
+```
+
+Let’s unpack this: with ` mutate()` we create a new variable called `major_type`, which is defined as **"stem"** if the major_category is in the vector called `stem_categories` we created earlier, and as **"not stem"** otherwise.
+
+%in% is a **logical operator** which tells us whether each element of the first vector is in the second. 
+
+Other logical operators that are commonly used are
+
+| Operator                   | Operation
+|:----------------|:--------------
+|`x < y`                     | less than
+| `x > y`                    | greater than
+| `x <= y`                   | less than or equal to
+| `x >= y`                   | greater than or equal to
+| `x != y`                   | not equal to
+| `x == y`                   | if equal to
+| `x %in% y`                 | contains
+| `x | y`                    | or
+| `x & y`                    | and
+| `!x`                       | not
+
+We can now filter our data for STEM majors and whose median earnings is less than $36,000.
+
+```{r medians-less-than-avg, exercise=TRUE, exercise.setup = "setup-major-type"}
+college_recent_grads %>%
+  group_by(major_type) %>% summarize(median(median) )
+  filter(
+    major_type == "stem", 
+    median < 36000) %>% 
+      select(major, major_category, median)
+```
+--->
+
+## Ending your session
+
+Congratulations! This concludes your introduction to `group_by` and `summarize`. In the next session, we will learn how to calculate various numerical summaries of center and spread.
+
+
+## Acknowledgments
+
+This lab is excerpted from an interactive tutorial of the same name from *Data Science in a Box*. Thanks always to Mine &Ccedil;etinkaya-Rundel for inspiring a community of statistics teachers!
