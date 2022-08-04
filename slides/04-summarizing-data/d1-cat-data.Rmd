@@ -1,0 +1,311 @@
+---
+title: "Summarizing Categorical Data" 
+subtitle: "UW MATHSUB 2022"
+author: "Slide credit: [Data Science in a Box](https://datasciencebox.org/)"
+output:
+  xaringan::moon_reader:
+    css: ["xaringan-themer.css", "slides.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: solarized-light
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r packages, echo=FALSE, message=FALSE, warning=FALSE}
+
+#r <- getOption("repos")
+#r["CRAN"] <- "https://cran.rstudio.com"
+#options(repos = r)
+
+#packages=c("tidyverse","stringr","fontawesome","magick")
+#sapply(X=packages,FUN=function(x) if(!require(x,character.only=TRUE))  install.packages(x,dependencies=TRUE) )
+#install.packages("devtools")
+#devtools::install_github("rstudio/fontawesome")
+#devtools::install_github("gadenbuie/xaringanExtra")
+
+
+library(countdown)
+library(emo)
+library(tidyr)
+library(tidyverse)
+library(stringr)
+library(fontawesome)
+library(magick)
+library(forcats)
+library(tibble)
+
+library(xaringanExtra)
+
+options(htmltools.dir.version = FALSE)
+xaringanExtra::use_panelset()
+xaringanExtra::use_fit_screen()
+#xaringanExtra::use_slide_tone()
+xaringanExtra::use_editable(expires=100)
+
+
+options(knit.table.format="html")
+
+```
+
+
+class: middle 
+
+## One Categorical Variable
+---
+class: top, left
+
+### Frequency table
+
+
+```{r}
+
+
+starwars %>% 
+    count(gender)
+
+```
+
+
+
+---
+
+class: middle
+## Two Categorical Variables
+
+
+---
+
+### Contingency table
+
+A cross tabulation of the frequencies for two categorical variables.
+
+```{r, echo=F, warning=F,message=F, out.width="60%"}
+
+king_county<-read_csv("data/king_county_police.csv")
+
+king_county<-king_county %>%
+                filter(!is.na(subject_race),  
+                       !is.na(citation_issued)) %>%
+                mutate(race=case_when(
+                  subject_race=="asian/pacific islander" ~ "asian",
+                  subject_race=="hispanic" ~ "hisp",
+                  subject_race=="black" ~ "black",
+                  subject_race=="white" ~"white",
+                  TRUE ~ "other"),
+                  citation=case_when( 
+                    citation_issued=="TRUE" ~ "yes", 
+                    TRUE ~ "no" ))
+                
+                               
+
+```
+
+
+.panelset[
+.panel[.panel-name[Table]
+```{r ref.label = "table", out.width="50%",fig.align="center",echo = FALSE, message=FALSE, warning = FALSE}
+```
+
+.small[Source: Stanford open policing data for King County ]
+]
+.panel[.panel-name[Code]
+```{r table, eval=FALSE, warning = FALSE, message=FALSE}
+library(janitor)  #<<
+king_county %>% 
+  tabyl( race, citation) %>% #<<
+   adorn_title()      #<< adds the column variable name to the top
+                      # but renders the table useless for 
+                      # further manipulation. so add it 
+                      # at end
+  
+```
+]
+]
+
+---
+### Contingency table: add row/column totals
+
+.panelset[
+.panel[.panel-name[Table]
+```{r ref.label = "table-margins", out.width="100%",fig.align="center",echo = FALSE, message=FALSE, warning = FALSE}
+```
+]
+.panel[.panel-name[Code]
+```{r table-margins, eval=FALSE, warning = FALSE}
+library(janitor)
+king_county %>% 
+  tabyl( race, citation) %>% 
+    adorn_totals(where=c("row", "col"))   #<<
+  
+```
+]
+]
+
+
+---
+### Contingency table: row percentages
+
+
+.panelset[
+.panel[.panel-name[Table]
+```{r ref.label = "table-row", out.width="100%",fig.align="center",echo = FALSE, warning = FALSE}
+```
+]
+.panel[.panel-name[Code]
+```{r table-row, eval=FALSE, warning = FALSE}
+
+library(janitor)
+king_county %>% 
+  tabyl( race, citation) %>% 
+    adorn_totals(where=c("row", "col") ) %>%
+    adorn_percentages(denominator="row") %>% #<<
+    adorn_pct_formatting(digits=2) %>%  #<<
+    adorn_ns()         %>%  #<<  (show cell frequencies)
+    adorn_title()
+  
+```
+]
+
+]
+
+???
+### Race and citations
+
+The Stanford Open Policing project gathers, analyzes, and releases records from traffic stops by law enforcement agencies across the United States. Their goal is to help researchers, journalists, and policy makers investigate and improve interactions between police and the public. 
+
+The following is an excerpt for traffic stops in King County over the period 2008-2018. Is there an association between race and whether or not a citation was issued?
+
+```{r, echo=F, warning=F,message=F, out.width="60%"}
+
+king_county<-read_csv("data/king_county_police.csv")
+
+king_county<-king_county %>%
+                filter(!is.na(subject_race),  
+                       !is.na(citation_issued)) %>%
+                mutate(race=case_when(
+                  subject_race=="asian/pacific islander" ~ "asian",
+                  subject_race=="hispanic" ~ "hisp",
+                  subject_race=="black" ~ "black",
+                  subject_race=="white" ~"white",
+                  TRUE ~ "other"),
+                  citation=case_when( 
+                    citation_issued=="TRUE" ~ "yes", 
+                    TRUE ~ "no" ))
+                
+                               
+
+```
+
+
+
+```{r echo=F, fig.align="center"}
+king_county %>% select(race, citation) %>%   
+                table() 
+         
+
+```
+
+
+### Race and citations: row and column totals
+
+```{r echo=F, fig.align="center"}
+king_county %>% select(race, citation) %>%   
+                table() %>% addmargins()
+         
+
+```
+
+
+
+- overall, citations were issued for half the stops. $$ \frac{27454}{51803} = 53\%$$
+
+- if race and citation are unrelated, we should see this pattern hold for each race. 
+
+- Deviations from this pattern for specific races suggests an association.
+
+---
+### Race and citations in King County: are they associated?
+
+
+```{r, echo=F, out.width="100%", fig.align="center"}
+
+king_county %>% 
+  tabyl( race, citation) %>% 
+    adorn_totals(where=c("row", "col") ) %>%
+    adorn_percentages(denominator="row") %>% 
+    adorn_pct_formatting(digits=2) %>% 
+    adorn_ns() %>%
+    adorn_title()
+         
+```
+
+- Overall, 53% of all drivers were cited.
+
+- However, Black and Hispanic drivers were cited more than 53% of the time.
+
+- Asian and White drivers were cited less than 53% of the time.
+
+- There is evidence of an association between race and whether a citation was given.
+---
+### Contingency table: mosaic plot
+
+
+.panelset[
+.panel[.panel-name[Plot]
+```{r ref.label = "mosaic-plot", out.width="60%",fig.align="center",echo = FALSE, warning = FALSE}
+```
+]
+.panel[.panel-name[Code]
+```{r mosaic-plot, eval=FALSE, warning = FALSE, fig.width=6,fig.height=4}
+
+mosaicplot(citation ~ race, data=king_county, shade=TRUE) #<<
+  
+```
+]
+.panel[ .panel-name[Text]
+.small[
+
+Each column represents whether or not a citation was issued. 
+
+Each row represents a different race category. 
+
+The size of each cell is proportional to the number of observations in that cell.
+
+Each cell is colored in one of three colors:
+
+ - blue: if the cell has a much higher % of cases than what we should see if there is no association
+ 
+ - red: if the cell has a much lower % of cases than what we should see if there is no association
+ 
+ - white: if the cell has about the right % of cases
+]
+]
+]
+---
+.question[Can we conclude that officers are targeting people based on race?]
+
+--
+
+ - No, because there are many other variables at play besides race here. 
+ 
+ - We call these other variables **confounding variables**.
+
+---
+class: top
+
+.left-column[#`r fontawesome::fa(name="laptop-code", fill="white")`]
+.right-column[
+
+1. .left[ Log in to [https://ranjini-grove.shinyapps.io/accidents/]( https://ranjini-grove.shinyapps.io/accidents/)]
+
+1. .left[ Work through the Accidents tutorial]
+
+
+]
+
+
+ `r countdown(minutes=50, seconds=0)`
+

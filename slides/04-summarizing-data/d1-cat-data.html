@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Summarizing Categorical Data</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Slide credit: Data Science in a Box" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/xaringanExtra_fit-screen/fit-screen.js"></script>
+    <script type="application/json" id="xaringanExtra-editable-docid">{"id":"e3e950ba4a51499a949aab84eb90f58b","expires":100}</script>
+    <script src="libs/himalaya/himalaya.js"></script>
+    <script src="libs/js-cookie/js.cookie.js"></script>
+    <link href="libs/editable/editable.css" rel="stylesheet" />
+    <script src="libs/editable/editable.js"></script>
+    <link href="libs/countdown/countdown.css" rel="stylesheet" />
+    <script src="libs/countdown/countdown.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Summarizing Categorical Data
+## UW MATHSUB 2022
+### Slide credit: <a href="https://datasciencebox.org/">Data Science in a Box</a>
+
+---
+
+
+
+
+
+class: middle 
+
+## One Categorical Variable
+---
+class: top, left
+
+### Frequency table
+
+
+
+```r
+starwars %&gt;% 
+    count(gender)
+```
+
+```
+## # A tibble: 3 x 2
+##   gender        n
+##   &lt;chr&gt;     &lt;int&gt;
+## 1 feminine     17
+## 2 masculine    66
+## 3 &lt;NA&gt;          4
+```
+
+
+
+---
+
+class: middle
+## Two Categorical Variables
+
+
+---
+
+### Contingency table
+
+A cross tabulation of the frequencies for two categorical variables.
+
+
+
+
+.panelset[
+.panel[.panel-name[Table]
+
+```
+##        citation      
+##   race       no   yes
+##  asian     2965  3143
+##  black     2079  2645
+##   hisp     1827  2299
+##  other      338   567
+##  white    17140 18800
+```
+
+.small[Source: Stanford open policing data for King County ]
+]
+.panel[.panel-name[Code]
+
+```r
+*library(janitor)
+king_county %&gt;% 
+* tabyl( race, citation) %&gt;%
+   adorn_title()      #&lt;&lt; adds the column variable name to the top
+                      # but renders the table useless for 
+                      # further manipulation. so add it 
+                      # at end
+```
+]
+]
+
+---
+### Contingency table: add row/column totals
+
+.panelset[
+.panel[.panel-name[Table]
+
+```
+##   race    no   yes Total
+##  asian  2965  3143  6108
+##  black  2079  2645  4724
+##   hisp  1827  2299  4126
+##  other   338   567   905
+##  white 17140 18800 35940
+##  Total 24349 27454 51803
+```
+]
+.panel[.panel-name[Code]
+
+```r
+library(janitor)
+king_county %&gt;% 
+  tabyl( race, citation) %&gt;% 
+*   adorn_totals(where=c("row", "col"))
+```
+]
+]
+
+
+---
+### Contingency table: row percentages
+
+
+.panelset[
+.panel[.panel-name[Table]
+
+```
+##              citation                               
+##   race             no            yes           Total
+##  asian 48.54%  (2965) 51.46%  (3143) 100.00%  (6108)
+##  black 44.01%  (2079) 55.99%  (2645) 100.00%  (4724)
+##   hisp 44.28%  (1827) 55.72%  (2299) 100.00%  (4126)
+##  other 37.35%   (338) 62.65%   (567) 100.00%   (905)
+##  white 47.69% (17140) 52.31% (18800) 100.00% (35940)
+##  Total 47.00% (24349) 53.00% (27454) 100.00% (51803)
+```
+]
+.panel[.panel-name[Code]
+
+```r
+library(janitor)
+king_county %&gt;% 
+  tabyl( race, citation) %&gt;% 
+    adorn_totals(where=c("row", "col") ) %&gt;%
+*   adorn_percentages(denominator="row") %&gt;%
+*   adorn_pct_formatting(digits=2) %&gt;%
+    adorn_ns()         %&gt;%  #&lt;&lt;  (show cell frequencies)
+    adorn_title()
+```
+]
+
+]
+
+???
+### Race and citations
+
+The Stanford Open Policing project gathers, analyzes, and releases records from traffic stops by law enforcement agencies across the United States. Their goal is to help researchers, journalists, and policy makers investigate and improve interactions between police and the public. 
+
+The following is an excerpt for traffic stops in King County over the period 2008-2018. Is there an association between race and whether or not a citation was issued?
+
+
+
+
+
+
+```
+##        citation
+## race       no   yes
+##   asian  2965  3143
+##   black  2079  2645
+##   hisp   1827  2299
+##   other   338   567
+##   white 17140 18800
+```
+
+
+### Race and citations: row and column totals
+
+
+```
+##        citation
+## race       no   yes   Sum
+##   asian  2965  3143  6108
+##   black  2079  2645  4724
+##   hisp   1827  2299  4126
+##   other   338   567   905
+##   white 17140 18800 35940
+##   Sum   24349 27454 51803
+```
+
+
+
+- overall, citations were issued for half the stops. $$ \frac{27454}{51803} = 53\%$$
+
+- if race and citation are unrelated, we should see this pattern hold for each race. 
+
+- Deviations from this pattern for specific races suggests an association.
+
+---
+### Race and citations in King County: are they associated?
+
+
+
+```
+##              citation                               
+##   race             no            yes           Total
+##  asian 48.54%  (2965) 51.46%  (3143) 100.00%  (6108)
+##  black 44.01%  (2079) 55.99%  (2645) 100.00%  (4724)
+##   hisp 44.28%  (1827) 55.72%  (2299) 100.00%  (4126)
+##  other 37.35%   (338) 62.65%   (567) 100.00%   (905)
+##  white 47.69% (17140) 52.31% (18800) 100.00% (35940)
+##  Total 47.00% (24349) 53.00% (27454) 100.00% (51803)
+```
+
+- Overall, 53% of all drivers were cited.
+
+- However, Black and Hispanic drivers were cited more than 53% of the time.
+
+- Asian and White drivers were cited less than 53% of the time.
+
+- There is evidence of an association between race and whether a citation was given.
+---
+### Contingency table: mosaic plot
+
+
+.panelset[
+.panel[.panel-name[Plot]
+&lt;img src="d1-cat-data_files/figure-html/unnamed-chunk-10-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+*mosaicplot(citation ~ race, data=king_county, shade=TRUE)
+```
+]
+.panel[ .panel-name[Text]
+.small[
+
+Each column represents whether or not a citation was issued. 
+
+Each row represents a different race category. 
+
+The size of each cell is proportional to the number of observations in that cell.
+
+Each cell is colored in one of three colors:
+
+ - blue: if the cell has a much higher % of cases than what we should see if there is no association
+ 
+ - red: if the cell has a much lower % of cases than what we should see if there is no association
+ 
+ - white: if the cell has about the right % of cases
+]
+]
+]
+---
+.question[Can we conclude that officers are targeting people based on race?]
+
+--
+
+ - No, because there are many other variables at play besides race here. 
+ 
+ - We call these other variables **confounding variables**.
+
+---
+class: top
+
+.left-column[#<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:white;overflow:visible;position:relative;"><path d="M128 96h384v256h64V80C576 53.63 554.4 32 528 32h-416C85.63 32 64 53.63 64 80V352h64V96zM624 384h-608C7.25 384 0 391.3 0 400V416c0 35.25 28.75 64 64 64h512c35.25 0 64-28.75 64-64v-16C640 391.3 632.8 384 624 384zM365.9 286.2C369.8 290.1 374.9 292 380 292s10.23-1.938 14.14-5.844l48-48c7.812-7.813 7.812-20.5 0-28.31l-48-48c-7.812-7.813-20.47-7.813-28.28 0c-7.812 7.813-7.812 20.5 0 28.31l33.86 33.84l-33.86 33.84C358 265.7 358 278.4 365.9 286.2zM274.1 161.9c-7.812-7.813-20.47-7.813-28.28 0l-48 48c-7.812 7.813-7.812 20.5 0 28.31l48 48C249.8 290.1 254.9 292 260 292s10.23-1.938 14.14-5.844c7.812-7.813 7.812-20.5 0-28.31L240.3 224l33.86-33.84C281.1 182.4 281.1 169.7 274.1 161.9z"/></svg>]
+.right-column[
+
+1. .left[ Log in to [https://ranjini-grove.shinyapps.io/accidents/]( https://ranjini-grove.shinyapps.io/accidents/)]
+
+1. .left[ Work through the Accidents tutorial]
+
+
+]
+
+
+ <div class="countdown" id="timer_62ec4823" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">50</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
